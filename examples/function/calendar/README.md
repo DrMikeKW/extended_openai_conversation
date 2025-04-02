@@ -76,6 +76,7 @@
             data: "{{ event_data }}"
             target: "{{ target_data }}"
             response_variable: _function_result
+```
 
 
 
