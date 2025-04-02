@@ -1,3 +1,4 @@
+# 2025-04-02
 """OpenAI Conversation integration with conversation history support."""
 from __future__ import annotations
 
@@ -203,7 +204,7 @@ class OpenAIAgent(conversation.AbstractConversationAgent):
                 f"Sorry, I had a problem talking to OpenAI: {err}",
             )
             return conversation.ConversationResult(
-                response=intent_response, conversation_id=chat_log.conversation_id
+                response=intent_response, conversation_id=chat_log.conversation_id, continue_conversation=self.continue_conversation(chat_log.content)
             )
         except HomeAssistantError as err:
             _LOGGER.error(err, exc_info=err)
@@ -233,7 +234,22 @@ class OpenAIAgent(conversation.AbstractConversationAgent):
         intent_response = intent.IntentResponse(language=user_input.language)
         intent_response.async_set_speech(query_response.message.content)
         return conversation.ConversationResult(
-            response=intent_response, conversation_id=chat_log.conversation_id
+            response=intent_response, conversation_id=chat_log.conversation_id, continue_conversation=self.continue_conversation(chat_log.content)
+        )
+
+    def continue_conversation(self, content) -> bool:
+        """Return whether the conversation should continue."""
+        _LOGGER.info("chat_log.content: %s", json.dumps(content))
+        if not content:
+            return False
+    
+        last_msg = content[-1]
+        _LOGGER.info("Lasta message to check continue_conversation: %s", json.dumps(last_msg))
+    
+        return (
+            last_msg["role"] == "assistant"
+            and last_msg.get("content") is not None
+            and last_msg.get("content", "").strip().endswith(("?", ";"))
         )
 
     def _generate_system_message(
