@@ -13,19 +13,19 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
-        ref: pr-311-changes  # Replace with your branch name
+        ref: paulberto94_master_forked_branch  # Your branch
 
     - name: Add fork remote
-      run: git remote add fork https://github.com/paulbertoli94/extended_openai_conversation.git  # Replace with the URL of the fork
+      run: git remote add fork https://github.com/paulbertoli94/extended_openai_conversation.git  # URL of the fork
 
     - name: Fetch fork changes
-      run: git fetch fork
+      run: git fetch fork master:fork-master  # Fetch the master branch from the fork
 
     - name: Merge fork changes
-      run: git merge fork/master  # Replace with the branch name of the fork
+      run: git merge fork-master  # Merge changes from the fork's master branch
 
     - name: Push changes
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git push origin pr-311-changes  # Replace with your branch name
+        git push origin paulberto94_master_forked_branch  # Push changes to your branch
