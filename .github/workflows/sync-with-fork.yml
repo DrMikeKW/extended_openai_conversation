@@ -1,0 +1,31 @@
+name: Sync with Fork
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs every day at midnight
+  workflow_dispatch:  # Allows manual triggering of the workflow
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        ref: pr-311-changes  # Replace with your branch name
+
+    - name: Add fork remote
+      run: git remote add fork https://github.com/jekalmin/extended_openai_conversation.git  # Replace with the URL of the fork
+
+    - name: Fetch fork changes
+      run: git fetch fork
+
+    - name: Merge fork changes
+      run: git merge fork/main  # Replace with the branch name of the fork
+
+    - name: Push changes
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git push origin pr-311-changes  # Replace with your branch name
