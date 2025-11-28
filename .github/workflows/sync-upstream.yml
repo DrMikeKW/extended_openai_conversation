@@ -1,0 +1,34 @@
+name: Sync upstream into original
+
+on:
+  schedule:
+    - cron: '0 2 * * *'    # daily at 02:00 UTC; change as desired
+  workflow_dispatch:      # allows manual run from Actions tab
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout original branch
+        uses: actions/checkout@v4
+        with:
+          ref: original
+          fetch-depth: 0
+
+      - name: Add upstream remote (jekalmin)
+        run: |
+          git remote add upstream https://github.com/jekalmin/extended_openai_conversation.git || true
+          git fetch --no-tags --prune --depth=1 upstream main
+
+      - name: Attempt fast-forward merge from upstream/main
+        run: |
+          # ensure we are on original
+          git checkout original
+          # attempt a fast-forward merge; fail if not fast-forward
+          if git merge --ff-only upstream/main; then
+            echo "Fast-forward merge succeeded. Pushing to origin..."
+            git push origin original
+          else
+            echo "Fast-forward not possible (diverged). Exiting with non-zero to mark job as failed."
+            exit 1
+          fi
